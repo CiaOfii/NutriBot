@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriCompanion - Edukasi Gizi Masyarakat & Konsultasi AI</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+  body { background: #f4f7f6; color: #333; line-height: 1.6; }
+  header { background: linear-gradient(135deg, #2e7d32, #66bb6a); color: white; padding: 1rem 2rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .logo { font-size: 1.5rem; font-weight: bold; }
+  nav { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+  nav ul { display: flex; list-style: none; gap: 1.5rem; flex-wrap: wrap; }
+  nav a { color: white; text-decoration: none; font-weight: 500; transition: 0.3s; }
+  nav a:hover { color: #c8e6c9; }
+  .hero { background: linear-gradient(135deg, #1b5e20, #43a047); color: white; padding: 4rem 2rem; text-align: center; }
+  .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+  .hero p { max-width: 800px; margin: 0 auto 2rem; font-size: 1.1rem; }
+  .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn { background: white; color: #2e7d32; padding: 0.8rem 1.5rem; border-radius: 30px; text-decoration: none; font-weight: bold; transition: 0.3s; border: none; cursor: pointer; }
+  .btn:hover { background: #c8e6c9; transform: translateY(-2px); }
+  .btn-outline { background: transparent; color: white; border: 2px solid white; }
+  .btn-outline:hover { background: white; color: #2e7d32; }
+  .stats { display: flex; justify-content: center; gap: 2rem; margin-top: 2rem; flex-wrap: wrap; }
+  .stat-item { background: rgba(255,255,255,0.15); padding: 1rem 1.5rem; border-radius: 12px; backdrop-filter: blur(10px); }
+  section { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
+  h2 { text-align: center; color: #2e7d32; margin-bottom: 2rem; font-size: 2rem; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .card { background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: 0.3s; }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+  .card h3 { color: #2e7d32; margin-bottom: 0.5rem; }
+  .calc-container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; margin-bottom: 0.3rem; font-weight: 600; color: #444; }
+  .form-group input, .form-group select { width: 100%; padding: 0.7rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .result-box { background: #e8f5e9; border-left: 5px solid #2e7d32; padding: 1.5rem; margin-top: 1.5rem; border-radius: 8px; }
+  .result-box h3 { color: #1b5e20; margin-bottom: 1rem; }
+  .result-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #a5d6a7; }
+  .piringku-visual { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; background: #f1f8e9; padding: 20px; border-radius: 50%; aspect-ratio: 1; max-width: 500px; margin: 2rem auto; }
+  .piringku-item { padding: 1.5rem; border-radius: 15px; color: white; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+  .pk-pokok { background: #8d6e63; grid-row: span 2; }
+  .pk-sayur { background: #43a047; }
+  .pk-lauk { background: #e53935; }
+  .pk-buah { background: #fb8c00; }
+  .chatbot-container { background: white; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; max-width: 800px; margin: 0 auto; }
+  .chat-header { background: linear-gradient(135deg, #2e7d32, #66bb6a); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+  .chat-messages { height: 400px; overflow-y: auto; padding: 1rem; background: #f9f9f9; }
+  .message { margin-bottom: 1rem; padding: 0.8rem 1rem; border-radius: 15px; max-width: 80%; }
+  .bot-msg { background: #e8f5e9; margin-right: auto; }
+  .user-msg { background: #2e7d32; color: white; margin-left: auto; }
+  .chat-input { display: flex; padding: 1rem; gap: 0.5rem; border-top: 1px solid #eee; }
+  .chat-input input { flex: 1; padding: 0.7rem; border: 1px solid #ccc; border-radius: 25px; }
+  .quick-topics { display: flex; gap: 0.5rem; padding: 1rem; flex-wrap: wrap; background: #f1f8e9; }
+  .topic-btn { background: white; border: 1px solid #66bb6a; color: #2e7d32; padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+  /* --- NutriBot Gemini (tambahan) --- */
+  .api-bar { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: #fffde7; border-bottom: 1px solid #eee; flex-wrap: wrap; font-size: 0.85rem; }
+  .api-bar input { flex: 1; min-width: 180px; padding: 0.5rem 0.8rem; border: 1px solid #ccc; border-radius: 20px; font-size: 0.85rem; }
+  .api-bar button { padding: 0.45rem 1rem; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+  .api-bar .btn-save { background: #2e7d32; color: white; }
+  .api-bar .btn-clear { background: transparent; color: #666; }
+  .api-status { font-weight: 600; color: #b26a00; }
+  .api-status.ok { color: #2e7d32; }
+  .api-hint { width: 100%; font-size: 0.75rem; color: #777; }
+  .message ul { margin: 0.4rem 0 0.4rem 1.2rem; }
+  .message p { margin: 0 0 0.5rem; }
+  .message p:last-child { margin-bottom: 0; }
+  .typing { opacity: 0.7; font-style: italic; }
+  .chat-input button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .article-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .article-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: 0.3s; }
+  .article-card:hover { transform: translateY(-5px); }
+  .article-img { height: 180px; background: linear-gradient(135deg, #66bb6a, #2e7d32); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; }
+  .article-content { padding: 1.5rem; }
+  .article-tag { display: inline-block; background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-bottom: 0.5rem; }
+  footer { background: #1b5e20; color: white; text-align: center; padding: 2rem; margin-top: 3rem; }
+
+  /* KPSP Styles */
+  .kpsp-container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .kpsp-info { background: #fff3e0; border-left: 5px solid #ff9800; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px; }
+  .kpsp-info strong { color: #e65100; }
+  .kpsp-question { background: #f9f9f9; padding: 1rem; margin-bottom: 0.8rem; border-radius: 10px; border-left: 4px solid #66bb6a; }
+  .kpsp-question p { margin-bottom: 0.5rem; font-weight: 500; }
+  .kpsp-options { display: flex; gap: 1rem; }
+  .kpsp-options label { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; padding: 0.3rem 0.8rem; border-radius: 20px; background: white; border: 1px solid #ccc; transition: 0.2s; }
+  .kpsp-options input[type="radio"] { cursor: pointer; }
+  .kpsp-options label:hover { background: #e8f5e9; }
+  .kpsp-result { padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; color: white; }
+  .kpsp-sesuai { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+  .kpsp-meragukan { background: linear-gradient(135deg, #f57c00, #ffb74d); }
+  .kpsp-penyimpangan { background: linear-gradient(135deg, #c62828, #ef5350); }
+  .age-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; margin: 1rem 0; }
+  .age-btn { padding: 0.6rem; border: 2px solid #66bb6a; background: white; color: #2e7d32; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+  .age-btn:hover, .age-btn.active { background: #2e7d32; color: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo">🥗 NutriCompanion</div>
+    <ul>
+      <li><a href="#beranda">Beranda</a></li>
+      <li><a href="#kalkulator">Kalkulator Gizi</a></li>
+      <li><a href="#kpsp">Kalkulator KPSP</a></li>
+      <li><a href="#piringku">Isi Piringku</a></li>
+      <li><a href="#edukasi">Artikel Edukasi</a></li>
+      <li><a href="#chatbot">Tanya NutriBot</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero" id="beranda">
+  <h1>Wujudkan Masyarakat Sehat & Sadar Gizi</h1>
+  <p>Kenali Gizi Seimbang, Hidup Lebih Sehat Setiap Hari.</p>
+  <p>Platform edukasi kesehatan masyarakat terpadu. Hitung kebutuhan nutrisi tubuh Anda, pahami panduan porsi makan ideal, dan konsultasikan gizi harian secara instan dengan asisten AI pintar kami.</p>
+  <div class="hero-btns">
+    <a href="#kalkulator" class="btn">Cek Kalkulator Gizi</a>
+    <a href="#kpsp" class="btn btn-outline">Skrining KPSP Anak</a>
+    <a href="#chatbot" class="btn btn-outline">Tanya Jawab AI Gizi</a>
+  </div>
+  <div class="stats">
+    <div class="stat-item">📊 Status Gizi Cepat</div>
+    <div class="stat-item">👶 Skrining KPSP</div>
+    <div class="stat-item">📘 Standar Acuan Kemenkes RI / WHO</div>
+    <div class="stat-item">🤖 Konsultasi AI 24/7 Siap Membantu</div>
+  </div>
+</section>
+
+<section id="kalkulator">
+  <h2>Kalkulator Kesehatan</h2>
+  <p style="text-align:center; margin-bottom:2rem;">Hitung IMT & Kebutuhan Kalori Harian. Ketahui status berat badan dan estimasi energi (BMR & TDEE) yang dibutuhkan tubuh Anda setiap harinya.</p>
+  <div class="calc-container">
+    <div class="form-row">
+      <div>
+        <div class="form-group"><label>Berat Badan (kg)</label><input type="number" id="berat" placeholder="Contoh: 60"></div>
+        <div class="form-group"><label>Tinggi Badan (cm)</label><input type="number" id="tinggi" placeholder="Contoh: 165"></div>
+        <div class="form-group"><label>Usia (Tahun)</label><input type="number" id="usia" placeholder="Contoh: 25"></div>
+        <div class="form-group"><label>Jenis Kelamin</label>
+          <select id="gender"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select>
+        </div>
+        <div class="form-group"><label>Tingkat Aktivitas Fisik</label>
+          <select id="aktivitas">
+            <option value="1.2">Jarang beraktivitas / Duduk seharian</option>
+            <option value="1.375">Ringan (Olah raga 1-3x seminggu)</option>
+            <option value="1.55">Sedang (Olah raga 3-5x seminggu)</option>
+            <option value="1.725">Berat (Olah raga 6-7x seminggu)</option>
+            <option value="1.9">Sangat Berat (Atlet / Pekerja fisik berat)</option>
+          </select>
+        </div>
+        <button class="btn" style="width:100%; background:#2e7d32; color:white;" onclick="hitungGizi()">Hitung Sekarang</button>
+      </div>
+      <div>
+        <div class="result-box" id="hasilGizi">
+          <h3>Hasil Analisis Gizi Anda</h3>
+          <p>Silakan masukkan data diri Anda pada formulir di samping dan klik "Hitung Sekarang".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BAGIAN KALKULATOR KPSP BARU ============ -->
+<section id="kpsp">
+  <h2>👶 Kalkulator KPSP - Skrining Perkembangan Anak</h2>
+  <p style="text-align:center; margin-bottom:2rem;">Kuesioner Pra Skrining Perkembangan (KPSP) untuk deteksi dini keterlambatan perkembangan anak usia 0–72 bulan yang sering berkaitan dengan risiko stunting.</p>
+  
+  <div class="kpsp-container">
+    <div class="kpsp-info">
+      <strong>⚠️ Penting:</strong> KPSP adalah alat skrining awal berdasarkan <em>Kemenkes RI</em>. Hasilnya bukan diagnosis medis. Jika hasil "Meragukan" atau "Penyimpangan", segera konsultasikan ke Puskesmas atau Dokter Tumbuh Kembang Anak.
+    </div>
+
+    <div class="form-group">
+      <label>Nama Anak (Opsional)</label>
+      <input type="text" id="namaAnak" placeholder="Contoh: Aisyah">
+    </div>
+
+    <div class="form-group">
+      <label>Usia Anak (Bulan) — Pilih kelompok usia terdekat:</label>
+      <div class="age-selector" id="ageSelector">
+        <button class="age-btn" data-age="3">3 bln</button>
+        <button class="age-btn" data-age="6">6 bln</button>
+        <button class="age-btn" data-age="9">9 bln</button>
+        <button class="age-btn" data-age="12">12 bln</button>
+        <button class="age-btn" data-age="15">15 bln</button>
+        <button class="age-btn" data-age="18">18 bln</button>
+        <button class="age-btn" data-age="24">24 bln</button>
+        <button class="age-btn" data-age="30">30 bln</button>
+        <button class="age-btn" data-age="36">36 bln</button>
+        <button class="age-btn" data-age="42">42 bln</button>
+        <button class="age-btn" data-age="48">48 bln</button>
+        <button class="age-btn" data-age="54">54 bln</button>
+        <button class="age-btn" data-age="60">60 bln</button>
+        <button class="age-btn" data-age="66">66 bln</button>
+        <button class="age-btn" data-age="72">72 bln</button>
+      </div>
+    </div>
+
+    <div id="kpspQuestions"></div>
+
+    <button class="btn" id="btnHitungKPSP" style="width:100%; background:#2e7d32; color:white; margin-top:1rem;" onclick="hitungKPSP()" disabled>Hitung Hasil Skrining</button>
+
+    <div id="hasilKPSP"></div>
+  </div>
+</section>
+
+<section id="piringku">
+  <h2>Panduan Kemenkes RI</h2>
+  <p style="text-align:center; margin-bottom:2rem;">Visualisasi "Isi Piringku" — Pedoman porsi makan sekali hidangan untuk mencukupi kebutuhan gizi seimbang keluarga Indonesia.</p>
+  <div class="piringku-visual">
+    <div class="piringku-item pk-pokok"><h3>Makanan Pokok</h3><p>1/3 Piring</p><small>Sumber karbohidrat kompleks</small></div>
+    <div class="piringku-item pk-sayur"><h3>Sayuran</h3><p>1/3 Piring</p></div>
+    <div class="piringku-item pk-lauk"><h3>Lauk-Pauk</h3><p>1/6 Piring</p></div>
+    <div class="piringku-item pk-buah"><h3>Buah</h3><p>1/6 Piring</p></div>
+  </div>
+  <div class="card-grid">
+    <div class="card"><h3>🍚 Makanan Pokok (1/3 Piring)</h3><p>Sumber karbohidrat kompleks seperti beras merah, jagung, ubi, kentang, atau gandum.</p></div>
+    <div class="card"><h3>🥬 Sayuran (1/3 Piring)</h3><p>Aneka sayuran hijau, oranye, dan merah kaya serat, vitamin, serta mineral pelindung tubuh.</p></div>
+    <div class="card"><h3>🍗 Lauk-Pauk (1/6 Piring)</h3><p>Sumber protein hewani (ikan, telur, ayam) dan nabati (tahu, tempe, kacang-kacangan).</p></div>
+    <div class="card"><h3>🍎 Buah-Buahan (1/6 Piring)</h3><p>Buah segar kaya antioksidan, vitamin C, dan anti-inflamasi alami untuk imunitas.</p></div>
+  </div>
+</section>
+
+<section id="chatbot">
+  <h2>Asisten Cerdas Gemini API</h2>
+  <p style="text-align:center; margin-bottom:2rem;">Konsultasi dengan NutriBot AI — Tanyakan apa saja seputar nutrisi, diet sehat, menu makanan seimbang, atau konsultasikan hasil IMT & KPSP Anda.</p>
+  <div class="chatbot-container">
+    <div class="chat-header">
+      <div><strong>🤖 NutriBot Ahli Gizi</strong><br><small>Online | Didukung oleh Gemini AI</small></div>
+      <button class="btn btn-outline" style="padding:0.3rem 0.8rem;" onclick="resetChat()">Reset Chat</button>
+    </div>
+    <div class="quick-topics">
+      <button class="topic-btn">Rekomendasi menu diet sehat seimbang</button>
+      <button class="topic-btn">Tips mencukupi kebutuhan protein harian</button>
+      <button class="topic-btn">Cara menurunkan berat badan aman</button>
+      <button class="topic-btn">Pencegahan stunting pada anak</button>
+    </div>
+    <div class="api-bar" id="apiBar">
+      <span class="api-status" id="apiStatus">API key belum diatur</span>
+      <input type="password" id="apiKeyInput" placeholder="Tempel API key Gemini Anda di sini" autocomplete="off">
+      <button class="btn-save" onclick="simpanApiKey()">Simpan Key</button>
+      <button class="btn-clear" onclick="hapusApiKey()">Hapus</button>
+      <span class="api-hint">Dapatkan key gratis di <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Key hanya disimpan di browser Anda.</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot-msg">Halo! Saya NutriBot, asisten ahli gizi Anda. Ada yang bisa saya bantu seputar gizi seimbang, perencanaan menu sehat, atau hasil kalkulator tubuh Anda hari ini?</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Ketik pertanyaan Anda...">
+      <button class="btn" id="btnKirim" style="background:#2e7d32; color:white;" onclick="kirimChat()">Kirim</button>
+    </div>
+  </div>
+</section>
+
+<section id="edukasi">
+  <h2>Pusat Informasi</h2>
+  <p style="text-align:center; margin-bottom:2rem;">Artikel & Edukasi Gizi Masyarakat — Baca berbagai informasi kesehatan dan tips gizi terbaru untuk mencegah stunting dan menjaga kebugaran.</p>
+  <div class="article-grid">
+    <div class="article-card">
+      <div class="article-img">🍼</div>
+      <div class="article-content">
+        <span class="article-tag">Pencegahan Stunting</span>
+        <h3>Pentingnya Protein Hewani Sejak 1000 HPK</h3>
+        <p>Peran krusial konsumsi telur, ikan, dan susu dalam mendukung pertumbuhan optimal anak pada masa 1000 Hari Pertama Kehidupan.</p>
+        <br><a href="#chatbot" class="btn" style="background:#2e7d32; color:white;">Diskusikan dengan Bot</a>
+      </div>
+    </div>
+    <div class="article-card">
+      <div class="article-img">💧</div>
+      <div class="article-content">
+        <span class="article-tag">Hidrasi & Metabolisme</span>
+        <h3>Cukupkah 8 Gelas Air Sehari untuk Tubuh?</h3>
+        <p>Memahami kebutuhan cairan tubuh harian serta dampak dehidrasi ringan terhadap konsentrasi dan kinerja metabolisme.</p>
+        <br><a href="#chatbot" class="btn" style="background:#2e7d32; color:white;">Diskusikan dengan Bot</a>
+      </div>
+    </div>
+    <div class="article-card">
+      <div class="article-img">🍚</div>
+      <div class="article-content">
+        <span class="article-tag">Pola Makan Sehat</span>
+        <h3>Mengatur Porsi Karbohidrat Tanpa Takut Gemuk</h3>
+        <p>Memilih sumber karbohidrat kompleks berserat tinggi dan mengatur takaran porsi sesuai prinsip Isi Piringku.</p>
+        <br><a href="#chatbot" class="btn" style="background:#2e7d32; color:white;">Diskusikan dengan Bot</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <h3>NutriCompanion</h3>
+  <p>Edukasi Gizi Masyarakat & Konsultasi AI</p>
+  <p>© 2026 NutriCompanion. Dikembangkan untuk kesehatan masyarakat.</p>
+</footer>
+
+<script>
+// ============ KALKULATOR IMT (ASLI) ============
+function hitungGizi() {
+  const b = parseFloat(document.getElementById('berat').value);
+  const t = parseFloat(document.getElementById('tinggi').value) / 100;
+  const u = parseFloat(document.getElementById('usia').value);
+  const g = document.getElementById('gender').value;
+  const a = parseFloat(document.getElementById('aktivitas').value);
+  if (!b || !t || !u) { alert('Lengkapi semua data!'); return; }
+  const imt = b / (t * t);
+  const bmr = g === 'L' ? 88.362 + (13.397 * b) + (4.799 * t * 100) - (5.677 * u)
+                        : 447.593 + (9.247 * b) + (3.098 * t * 100) - (4.330 * u);
+  const tdee = bmr * a;
+  const karbo = Math.round((tdee * 0.55) / 4);
+  const protein = Math.round((tdee * 0.15) / 4);
+  const lemak = Math.round((tdee * 0.30) / 9);
+  let status = '';
+  if (imt < 18.5) status = 'Berat Badan Kurang';
+  else if (imt < 25) status = 'Normal (Ideal)';
+  else if (imt < 30) status = 'Kelebihan Berat Badan';
+  else status = 'Obesitas';
+  document.getElementById('hasilGizi').innerHTML = `
+    <h3>Hasil Analisis Gizi Anda</h3>
+    <div class="result-item"><span>Indeks Massa Tubuh (IMT)</span><strong>${imt.toFixed(1)} — ${status}</strong></div>
+    <div class="result-item"><span>Kebutuhan Kalori (TDEE)</span><strong>${Math.round(tdee)} Kcal / hari</strong></div>
+    <div class="result-item"><span>Karbohidrat (55%)</span><strong>${karbo} gram</strong></div>
+    <div class="result-item"><span>Protein (15%)</span><strong>${protein} gram</strong></div>
+    <div class="result-item"><span>Lemak (30%)</span><strong>${lemak} gram</strong></div>
+    <p style="margin-top:1rem;"><a href="#chatbot" class="btn" style="background:#2e7d32; color:white;">Konsultasikan dengan NutriBot AI</a></p>`;
+}
+
+// ============ KALKULATOR KPSP (BARU) ============
+const dataKPSP = {
+  3: [
+    "Bayi dapat menelan ASI/makanan dengan baik",
+    "Bayi menggerakkan kedua tangan dan kaki secara simetris",
+    "Bayi menatap wajah orang yang berbicara",
+    "Bayi bereaksi terhadap suara dengan berhenti menangis atau melirik",
+    "Bayi mengikuti benda bergerak dengan mata",
+    "Bayi tersenyum sebagai respon terhadap ajakan bicara",
+    "Bayi mengangkat kepala saat tengkurap",
+    "Bayi mengeluarkan suara 'oo' atau 'aa'",
+    "Bayi menggenggam jari yang diletakkan di tangannya"
+  ],
+  6: [
+    "Bayi tersenyum saat diajak bermain",
+    "Bayi menoleh ke arah sumber suara",
+    "Bayi meraih benda yang ada di depannya",
+    "Bayi memindahkan benda dari satu tangan ke tangan lain",
+    "Bayi tengkurap sendiri dan menyangga badan dengan tangan",
+    "Bayi berusaha meraih benda yang dijauhkan",
+    "Bayi mengeluarkan suara 'ba-ba', 'ma-ma'",
+    "Bayi tertawa atau bersuara gembira",
+    "Bayi menatap gambar/cermin dengan tertarik"
+  ],
+  9: [
+    "Anak duduk sendiri tanpa bantuan",
+    "Anak berdiri dengan berpegangan",
+    "Anak merangkak",
+    "Anak mengambil benda kecil dengan ibu jari dan telunjuk (pincer grasp)",
+    "Anak menoleh saat namanya dipanggil",
+    "Anak mengucapkan 'da-da' atau 'ma-ma' tanpa arti",
+    "Anak mencari benda yang disembunyikan",
+    "Anak minum dari gelas sendiri dengan bantuan",
+    "Anak bermain tepuk tangan atau cilukba"
+  ],
+  12: [
+    "Anak berdiri sendiri tanpa berpegangan",
+    "Anak berjalan dengan berpegangan pada furnitur",
+    "Anak mengucapkan 2-3 kata selain 'mama'/'papa'",
+    "Anak memahami perintah sederhana seperti 'ambil bola'",
+    "Anak menunjuk benda yang diinginkannya",
+    "Anak memukul dua benda bersamaan",
+    "Anak memasukkan benda kecil ke dalam wadah",
+    "Anak minum dari cangkir sendiri tanpa tumpah banyak",
+    "Anak bereaksi saat melihat anak lain menangis"
+  ],
+  15: [
+    "Anak berjalan sendiri tanpa jatuh",
+    "Anak mengambil benda kecil dengan jepitan jari",
+    "Anak mengucapkan 3-5 kata bermakna",
+    "Anak menunjuk bagian tubuh saat ditanya",
+    "Anak meniru kegiatan rumah tangga sederhana",
+    "Anak mencoret-coret dengan pensil",
+    "Anak menyusun 2 balok menjadi menara",
+    "Anak meminum dari cangkir sendiri",
+    "Anak mengenal nama benda familiar"
+  ],
+  18: [
+    "Anak berlari-lari kecil",
+    "Anak naik tangga dengan berpegangan",
+    "Anak menyusun 3-4 balok menjadi menara",
+    "Anak mengucapkan 10 kata bermakna",
+    "Anak menunjuk gambar di buku saat disebut namanya",
+    "Anak makan sendiri dengan sendok (meski berantakan)",
+    "Anak menendang bola kecil",
+    "Anak melepas pakaiannya sendiri (kaus kaki/topi)",
+    "Anak mengenal fungsi benda (sisir, sendok, sikat gigi)"
+  ],
+  24: [
+    "Anak melompat dengan dua kaki",
+    "Anak naik-turun tangga sendiri",
+    "Anak menyusun 6-7 balok menjadi menara",
+    "Anak merangkai 2-3 kata menjadi kalimat sederhana",
+    "Anak mengikuti 2 perintah berurutan",
+    "Anak menyebut nama sendiri",
+    "Anak bermain pura-pura (memberi makan boneka)",
+    "Anak menggambar garis atau lingkaran sederhana",
+    "Anak membantu memungut mainan saat diminta"
+  ],
+  30: [
+    "Anak berdiri satu kaki selama 1-2 detik",
+    "Anak mengayuh sepeda roda tiga",
+    "Anak menyusun 8 balok menjadi menara",
+    "Anak menggunakan kalimat 3-4 kata",
+    "Anak mengenal 2-3 warna dasar",
+    "Anak menghitung 1-5 dengan jari",
+    "Anak bermain bersama anak lain (bukan paralel)",
+    "Anak mencuci dan mengeringkan tangan sendiri",
+    "Anak menyebutkan nama teman dekatnya"
+  ],
+  36: [
+    "Anak berdiri satu kaki selama 3-5 detik",
+    "Anak meniru garis lurus dan lingkaran",
+    "Anak menyusun 9-10 balok menjadi menara",
+    "Anak bercerita singkat tentang kegiatannya",
+    "Anak mengenal 3-4 warna",
+    "Anak menghitung 5-10 benda",
+    "Anak memakai baju sendiri dengan bantuan",
+    "Anak bermain peran (dokter, guru, penjual)",
+    "Anak mengikuti aturan permainan sederhana"
+  ],
+  42: [
+    "Anak melompat-lompat dengan satu kaki",
+    "Anak mengancingkan baju besar",
+    "Anak menggambar orang dengan 2-3 bagian tubuh",
+    "Anak menyebutkan 4 warna",
+    "Anak menghitung 10 benda dengan benar",
+    "Anak menceritakan pengalaman sederhana",
+    "Anak bermain kooperatif dengan teman",
+    "Anak menggunakan gunting anak dengan bantuan",
+    "Anak mengenal konsep besar-kecil, panjang-pendek"
+  ],
+  48: [
+    "Anak berdiri satu kaki selama 8-10 detik",
+    "Anak menggambar orang dengan 4-6 bagian tubuh",
+    "Anak menulis namanya sendiri",
+    "Anak mengenal 5-7 warna",
+    "Anak menghitung 1-20",
+    "Anak bercerita runtut tentang pengalamannya",
+    "Anak berpakaian sendiri tanpa bantuan",
+    "Anak mengikuti aturan permainan berkelompok",
+    "Anak mengenal konsep waktu (pagi, siang, malam)"
+  ],
+  54: [
+    "Anak melompat dengan satu kaki beberapa kali",
+    "Anak mengikat tali sepatu sederhana",
+    "Anak menggambar orang lengkap (6-8 bagian)",
+    "Anak mengenal huruf A-Z",
+    "Anak menghitung 1-30",
+    "Anak menulis angka 1-10",
+    "Anak bermain peran kompleks dengan teman",
+    "Anak memahami aturan lalu lintas sederhana",
+    "Anak menceritakan kembali cerita pendek"
+  ],
+  60: [
+    "Anak bersepeda roda dua dengan roda bantu",
+    "Anak menggambar bentuk geometri (kotak, segitiga)",
+    "Anak menulis kalimat sederhana",
+    "Anak membaca kata-kata sederhana",
+    "Anak menghitung 1-50",
+    "Anak menjumlahkan angka sederhana (1-10)",
+    "Anak bermain aturan kompleks dengan teman",
+    "Anak berpakaian sendiri sesuai cuaca",
+    "Anak memahami konsep sebab-akibat"
+  ],
+  66: [
+    "Anak melompat-lompat dengan lincah",
+    "Anak menggambar rumah dengan detail",
+    "Anak menulis kalimat lengkap",
+    "Anak membaca kalimat pendek",
+    "Anak menghitung 1-100",
+    "Anak mengenal hari dalam seminggu",
+    "Anak bermain kelompok dengan aturan",
+    "Anak membantu pekerjaan rumah sederhana",
+    "Anak mengekspresikan perasaan dengan kata-kata"
+  ],
+  72: [
+    "Anak berlari, melompat, dan menari dengan koordinasi baik",
+    "Anak menulis nama lengkapnya",
+    "Anak membaca cerita pendek",
+    "Anak menjumlah dan mengurang sederhana",
+    "Anak mengenal angka 1-100",
+    "Anak menceritakan pengalaman dengan runtut",
+    "Anak bermain kooperatif dalam kelompok",
+    "Anak memahami aturan sosial dan sopan santun",
+    "Anak mempersiapkan diri masuk SD"
+  ]
+};
+
+let selectedAge = null;
+
+document.querySelectorAll('.age-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    selectedAge = parseInt(this.dataset.age);
+    renderKPSPQuestions(selectedAge);
+    document.getElementById('btnHitungKPSP').disabled = false;
+    document.getElementById('hasilKPSP').innerHTML = '';
+  });
+});
+
+function renderKPSPQuestions(age) {
+  const questions = dataKPSP[age];
+  const container = document.getElementById('kpspQuestions');
+  let html = `<h3 style="color:#2e7d32; margin:1rem 0;">Pertanyaan KPSP untuk usia ${age} bulan:</h3>`;
+  questions.forEach((q, i) => {
+    html += `
+      <div class="kpsp-question">
+        <p><strong>${i+1}.</strong> ${q}</p>
+        <div class="kpsp-options">
+          <label><input type="radio" name="q${i}" value="ya" required> Ya, bisa</label>
+          <label><input type="radio" name="q${i}" value="tidak"> Tidak / Belum</label>
+        </div>
+      </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function hitungKPSP() {
+  const questions = dataKPSP[selectedAge];
+  let jawabYa = 0;
+  let tidakTerjawab = 0;
+  const detailTidak = [];
+
+  for (let i = 0; i < questions.length; i++) {
+    const jawaban = document.querySelector(`input[name="q${i}"]:checked`);
+    if (!jawaban) { tidakTerjawab++; continue; }
+    if (jawaban.value === 'ya') jawabYa++;
+    else detailTidak.push(questions[i]);
+  }
+
+  if (tidakTerjawab > 0) {
+    alert(`Masih ada ${tidakTerjawab} pertanyaan yang belum dijawab!`);
+    return;
+  }
+
+  const nama = document.getElementById('namaAnak').value || 'Anak';
+  let status, kelas, rekomendasi;
+
+  if (jawabYa === 9) {
+    status = 'SESUAI';
+    kelas = 'kpsp-sesuai';
+    rekomendasi = `✅ Perkembangan <strong>${nama}</strong> <strong>Sesuai</strong> dengan usianya (${selectedAge} bulan). Lanjutkan stimulasi dengan bermain, membaca buku cerita, dan memberikan gizi seimbang sesuai prinsip Isi Piringku untuk mencegah stunting. Ulangi skrining pada kelompok usia berikutnya.`;
+  } else if (jawabYa >= 7) {
+    status = 'MERAGUKAN';
+    kelas = 'kpsp-meragukan';
+    rekomendasi = `⚠️ Perkembangan <strong>${nama}</strong> <strong>Meragukan</strong>. Berikan stimulasi lebih intensif pada aspek yang belum dikuasai selama 2 minggu, lalu ulangi KPSP. Jika masih meragukan, bawa ke <strong>Puskesmas / Dokter Tumbuh Kembang</strong> untuk pemeriksaan lanjutan (DDTK). Pastikan asupan protein hewani (telur, ikan, susu) terpenuhi untuk mencegah stunting.`;
+  } else {
+    status = 'PENYIMPANGAN';
+    kelas = 'kpsp-penyimpangan';
+    rekomendasi = `🚨 Perkembangan <strong>${nama}</strong> menunjukkan <strong>Penyimpangan</strong>. Segera bawa ke <strong>Puskesmas / Rumah Sakit / Dokter Tumbuh Kembang Anak</strong> untuk evaluasi menyeluruh (DDTK). Periksa juga status gizi (TB/U) untuk mendeteksi stunting. Intervensi dini sangat penting pada usia emas 0-72 bulan.`;
+  }
+
+  let detailHtml = '';
+  if (detailTidak.length > 0) {
+    detailHtml = `<p style="margin-top:1rem;"><strong>Aspek yang perlu stimulasi:</strong></p><ul style="margin-left:1rem;">`;
+    detailTidak.forEach(d => { detailHtml += `<li>${d}</li>`; });
+    detailHtml += `</ul>`;
+  }
+
+  document.getElementById('hasilKPSP').innerHTML = `
+    <div class="kpsp-result ${kelas}">
+      <h3>Hasil Skrining KPSP: ${status}</h3>
+      <p>Jawaban "Ya": <strong>${jawabYa} dari 9</strong></p>
+      <p style="margin-top:1rem;">${rekomendasi}</p>
+      ${detailHtml}
+      <p style="margin-top:1rem;"><a href="#chatbot" class="btn" style="background:white; color:#2e7d32;">Konsultasi dengan NutriBot</a></p>
+    </div>`;
+  document.getElementById('hasilKPSP').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============ CHATBOT (GEMINI API) ============
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+// Urutan model yang dicoba. Jika satu model sudah tidak tersedia, otomatis lanjut ke berikutnya,
+// lalu (jika semua gagal) daftar model terbaru diambil langsung dari Google (ListModels).
+const GEMINI_MODEL_PREFERENCE = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
+const LS_API_KEY = 'nutribot_gemini_key';
+const LS_MODEL = 'nutribot_gemini_model';
+const GREETING = 'Halo! Saya NutriBot, asisten ahli gizi Anda. Ada yang bisa saya bantu seputar gizi seimbang, perencanaan menu sehat, atau hasil kalkulator tubuh Anda hari ini?';
+
+const NUTRIBOT_SYSTEM_PROMPT = `Anda adalah NutriBot, asisten edukasi gizi pada situs NutriCompanion (Edukasi Gizi Masyarakat Indonesia).
+Aturan:
+- Jawab dalam Bahasa Indonesia yang ramah, jelas, dan ringkas (maksimal sekitar 200 kata kecuali diminta rinci).
+- Fokus pada gizi seimbang, pedoman "Isi Piringku" Kemenkes RI, menu sehat dengan bahan lokal Indonesia, pencegahan stunting, dan 1000 HPK.
+- Gunakan format sederhana: paragraf pendek, daftar berpoin dengan tanda "-", dan **tebal** seperlunya. Jangan gunakan tabel atau heading.
+- Anda bukan pengganti dokter atau ahli gizi. Untuk kondisi medis, penyakit, alergi berat, ibu hamil/menyusui, atau perkembangan anak yang meragukan, sarankan konsultasi ke Puskesmas, dokter, atau ahli gizi.
+- Jika pertanyaan di luar topik gizi dan kesehatan, tolak dengan sopan dan arahkan kembali ke topik gizi.
+- Jangan mengarang data; jika tidak yakin, katakan terus terang.`;
+
+let chatHistory = [];   // format Gemini: {role: 'user'|'model', parts:[{text}]}
+let chatBusy = false;
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Markdown sederhana (aman: teks di-escape dulu): **tebal**, *miring*, daftar "- " / "* " / "1. ", paragraf
+function renderMarkdown(text) {
+  const lines = escapeHtml(text).split(/\r?\n/);
+  const inline = t => t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/(^|[^*])\*([^*\s][^*]*?)\*(?!\*)/g, '$1<em>$2</em>');
+  let html = '', inList = false, para = [];
+  const flushPara = () => { if (para.length) { html += '<p>' + inline(para.join('<br>')) + '</p>'; para = []; } };
+  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+  for (const raw of lines) {
+    const line = raw.trim();
+    const li = line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/);
+    if (li) { flushPara(); if (!inList) { html += '<ul>'; inList = true; } html += '<li>' + inline(li[1]) + '</li>'; }
+    else if (line === '') { flushPara(); closeList(); }
+    else { closeList(); para.push(line.replace(/^#{1,6}\s+/, '')); }
+  }
+  flushPara(); closeList();
+  return html;
+}
+
+function addMessage(role, html, extraClass) {
+  const box = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message ' + (role === 'user' ? 'user-msg' : 'bot-msg') + (extraClass ? ' ' + extraClass : '');
+  div.innerHTML = html;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+// ---------- API key ----------
+function getApiKey() { try { return localStorage.getItem(LS_API_KEY) || ''; } catch (e) { return ''; } }
+function updateApiStatus() {
+  const el = document.getElementById('apiStatus');
+  if (!el) return;
+  const has = !!getApiKey();
+  el.textContent = has ? '✔ API key tersimpan' : 'API key belum diatur';
+  el.classList.toggle('ok', has);
+}
+function simpanApiKey() {
+  const input = document.getElementById('apiKeyInput');
+  const key = input.value.trim();
+  if (!key) { alert('Tempel API key Gemini Anda terlebih dahulu.'); return; }
+  try { localStorage.setItem(LS_API_KEY, key); localStorage.removeItem(LS_MODEL); } catch (e) { alert('Browser tidak mengizinkan penyimpanan lokal.'); return; }
+  input.value = '';
+  updateApiStatus();
+  addMessage('bot', 'API key tersimpan. Silakan ajukan pertanyaan Anda seputar gizi.');
+}
+function hapusApiKey() {
+  try { localStorage.removeItem(LS_API_KEY); localStorage.removeItem(LS_MODEL); } catch (e) {}
+  document.getElementById('apiKeyInput').value = '';
+  updateApiStatus();
+}
+
+// ---------- Konteks dari kalkulator (dibaca dari halaman, tanpa mengubah kalkulator) ----------
+function getSiteContext() {
+  const read = id => { const el = document.getElementById(id); return el ? String(el.innerText || el.textContent || '').trim() : ''; };
+  let ctx = '';
+  const gizi = read('hasilGizi').replace(/Konsultasikan dengan NutriBot AI/g, '').trim();
+  if (gizi) ctx += '\n\nHasil kalkulator gizi pengguna saat ini (gunakan jika relevan dengan pertanyaan):\n' + gizi;
+  const kpsp = read('hasilKPSP').replace(/Konsultasi dengan NutriBot/g, '').trim();
+  if (kpsp) ctx += '\n\nHasil skrining KPSP saat ini (gunakan jika relevan):\n' + kpsp;
+  return ctx;
+}
+
+// ---------- Pemanggilan Gemini ----------
+class GeminiError extends Error {
+  constructor(message, status, modelProblem) { super(message); this.status = status; this.modelProblem = !!modelProblem; }
+}
+
+async function parseApiError(res) {
+  let msg = '';
+  try { const j = await res.json(); msg = (j.error && j.error.message) || ''; } catch (e) {}
+  const low = msg.toLowerCase();
+  const modelProblem = res.status === 404 || /no longer available|not found|not supported|deprecated|is not available/.test(low);
+  if (res.status === 400 && /api key|api_key/.test(low)) return new GeminiError('API key tidak valid. Periksa kembali key Anda lalu simpan ulang.', 400, false);
+  if (res.status === 401 || res.status === 403) return new GeminiError('API key ditolak atau tidak punya izin (' + res.status + '). Pastikan key aktif dan Gemini API diizinkan.', res.status, modelProblem);
+  if (res.status === 429) return new GeminiError('Kuota/batas permintaan API key tercapai. Tunggu sebentar lalu coba lagi.', 429, false);
+  if (res.status >= 500) return new GeminiError('Layanan Gemini sedang sibuk. Coba lagi sebentar lagi.', res.status, false);
+  return new GeminiError(msg || ('Terjadi kesalahan (HTTP ' + res.status + ').'), res.status, modelProblem);
+}
+
+async function fetchWithTimeout(url, options, ms) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  try { return await fetch(url, Object.assign({}, options, { signal: ctrl.signal })); }
+  catch (e) {
+    if (e.name === 'AbortError') throw new GeminiError('Permintaan terlalu lama (timeout). Coba lagi.', 0, false);
+    throw new GeminiError('Tidak dapat terhubung ke server Gemini. Periksa koneksi internet Anda.', 0, false);
+  }
+  finally { clearTimeout(t); }
+}
+
+async function callGemini(model, key, contents) {
+  const url = GEMINI_BASE + '/models/' + encodeURIComponent(model) + ':generateContent';
+  const makeOptions = (withThinking) => {
+    const generationConfig = { temperature: 0.7, maxOutputTokens: 2048 };
+    if (withThinking && /^gemini-3/.test(model)) generationConfig.thinkingConfig = { thinkingLevel: 'low' };
+    const body = {
+      systemInstruction: { parts: [{ text: NUTRIBOT_SYSTEM_PROMPT + getSiteContext() }] },
+      contents: contents,
+      generationConfig: generationConfig
+    };
+    return { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body) };
+  };
+  let res = await fetchWithTimeout(url, makeOptions(true), 45000);
+  if (res.status === 400) {                       // beberapa model menolak thinkingConfig -> coba lagi tanpa itu
+    const err = await parseApiError(res.clone ? res.clone() : res);
+    if (/thinking/i.test(err.message)) res = await fetchWithTimeout(url, makeOptions(false), 45000);
+    else throw err;
+  }
+  if (res.status === 503) { await new Promise(r => setTimeout(r, 1500)); res = await fetchWithTimeout(url, makeOptions(true), 45000); }
+  if (!res.ok) throw await parseApiError(res);
+  const data = await res.json();
+  if (data.promptFeedback && data.promptFeedback.blockReason) throw new GeminiError('Pertanyaan diblokir oleh filter keamanan. Coba ubah kalimat Anda.', 200, false);
+  const cand = data.candidates && data.candidates[0];
+  const parts = (cand && cand.content && cand.content.parts) || [];
+  const text = parts.filter(p => p.text && !p.thought).map(p => p.text).join('').trim();
+  if (!text) throw new GeminiError('Bot tidak menghasilkan jawaban (' + ((cand && cand.finishReason) || 'kosong') + '). Coba ulangi pertanyaan.', 200, false);
+  return text;
+}
+
+// Ambil daftar model flash terbaru yang mendukung generateContent langsung dari Google
+async function discoverModels(key) {
+  const res = await fetchWithTimeout(GEMINI_BASE + '/models?pageSize=200', { headers: { 'x-goog-api-key': key } }, 20000);
+  if (!res.ok) return [];
+  const data = await res.json();
+  const ver = n => (n.match(/gemini-(\d+(?:\.\d+)?)/) || [0, 0])[1] * 1;
+  return (data.models || [])
+    .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+    .map(m => m.name.replace(/^models\//, ''))
+    .filter(n => /^gemini-[\d.]+-flash(-lite)?$/.test(n))
+    .sort((a, b) => ver(b) - ver(a) || a.length - b.length);
+}
+
+async function askGemini(key, contents) {
+  let cached = '';
+  try { cached = localStorage.getItem(LS_MODEL) || ''; } catch (e) {}
+  const tried = new Set();
+  const queue = [cached, ...GEMINI_MODEL_PREFERENCE].filter(Boolean);
+  let discovered = false, lastErr = null;
+
+  while (queue.length) {
+    const model = queue.shift();
+    if (tried.has(model)) continue;
+    tried.add(model);
+    try {
+      const text = await callGemini(model, key, contents);
+      try { localStorage.setItem(LS_MODEL, model); } catch (e) {}
+      return text;
+    } catch (err) {
+      lastErr = err;
+      if (!err.modelProblem) throw err;           // bukan masalah model (key salah, kuota, jaringan) -> berhenti
+      try { if (localStorage.getItem(LS_MODEL) === model) localStorage.removeItem(LS_MODEL); } catch (e) {}
+    }
+    if (!queue.length && !discovered) {            // semua model bawaan gagal -> cari model yang tersedia
+      discovered = true;
+      const found = await discoverModels(key);
+      found.forEach(m => { if (!tried.has(m)) queue.push(m); });
+    }
+  }
+  throw new GeminiError('Tidak ada model Gemini yang tersedia untuk API key ini. ' + (lastErr ? lastErr.message : ''), 0, false);
+}
+
+// ---------- Fungsi chat (nama tetap: kirimChat & resetChat) ----------
+async function kirimChat() {
+  if (chatBusy) return;
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  addMessage('user', escapeHtml(msg));
+  input.value = '';
+
+  const key = getApiKey();
+  if (!key) {
+    addMessage('bot', 'API key Gemini belum diatur. Tempel API key pada kolom kuning di atas lalu klik <strong>Simpan Key</strong>, kemudian kirim ulang pertanyaan Anda.');
+    document.getElementById('apiKeyInput').focus();
+    return;
+  }
+
+  chatBusy = true;
+  const btn = document.getElementById('btnKirim');
+  if (btn) btn.disabled = true;
+  const typing = addMessage('bot', 'NutriBot sedang mengetik…', 'typing');
+  const slowTimer = setTimeout(() => { typing.textContent = 'Masih memproses, mohon tunggu sebentar…'; }, 8000);
+
+  chatHistory.push({ role: 'user', parts: [{ text: msg }] });
+  if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+  while (chatHistory.length && chatHistory[0].role !== 'user') chatHistory.shift();
+
+  try {
+    const answer = await askGemini(key, chatHistory);
+    chatHistory.push({ role: 'model', parts: [{ text: answer }] });
+    typing.remove();
+    addMessage('bot', renderMarkdown(answer));
+  } catch (err) {
+    chatHistory.pop();                              // buang pesan gagal agar riwayat tetap konsisten
+    typing.remove();
+    console.error('NutriBot error:', err);
+    addMessage('bot', 'Maaf, terjadi kendala: ' + escapeHtml(err.message || 'tidak diketahui'));
+  } finally {
+    clearTimeout(slowTimer);
+    chatBusy = false;
+    if (btn) btn.disabled = false;
+    input.focus();
+  }
+}
+
+function resetChat() {
+  chatHistory = [];
+  document.getElementById('chatMessages').innerHTML = `<div class="message bot-msg">${GREETING}</div>`;
+}
+
+document.querySelectorAll('.topic-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('chatInput').value = btn.innerText;
+    kirimChat();
+  });
+});
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); kirimChat(); }
+});
+document.getElementById('apiKeyInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); simpanApiKey(); }
+});
+updateApiStatus();
+
+</script>
+
+</body>
+</html>
